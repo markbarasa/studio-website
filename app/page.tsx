@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { createBooking, getBookings } from "@/lib/supabase/db";
-
 /* ---------------- TYPES ---------------- */
 type PackageFeature = string;
 
@@ -34,8 +33,9 @@ type Booking = {
   phone: string;
   date: string;
   message: string;
-  status: "pending";
+  status: "pending" | "confirmed" | "completed" | "cancelled";
   deposit?: number;
+  paymentStatus?: string;
 };
 
 type PortfolioCategory = "all" | "wedding" | "traditional" | "corporate" | "podcast" | "documentary" | "studio";
@@ -652,13 +652,14 @@ export default function Home() {
   };
 
   /* ---------------- DAILY LIMIT (using Supabase data) ---------------- */
-  const getBookingsForDate = (date: string) => {
-    return bookings.filter((b) => b.date === date && b.status !== "cancelled");
-  };
+const getBookingsForDate = (date: string) => {
+  return bookings.filter((b) => b.date === date);
+};
 
-  const isDateFullyBooked = (date: string) => {
-    return getBookingsForDate(date).length >= 2;
-  };
+const isDateFullyBooked = (date: string) => {
+  return getBookingsForDate(date).length >= 2;
+};
+
 
   /* ---------------- FILTER AVAILABLE DATES ---------------- */
   const filterAvailableDates = (date: Date) => {
@@ -1095,14 +1096,15 @@ _Keep this message for your records_`;
                       Event Date *
                     </label>
                     <DatePicker
-                      selected={form.date ? new Date(form.date) : null}
-                      onChange={(date) => {
-                        if (!date) return;
-                        setForm({
-                          ...form,
-                          date: formatLocalDate(date),
-                        });
-                      }}
+  selected={form.date ? new Date(form.date) : null}
+  onChange={(date: Date | null) => {
+    if (!date) return;
+    setForm({
+      ...form,
+      date: formatLocalDate(date),
+    });
+  }}
+
                       filterDate={filterAvailableDates}
                       dayClassName={(date) => {
                         const formatted = formatLocalDate(date);
