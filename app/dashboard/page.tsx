@@ -36,23 +36,15 @@ type Payment = {
 
 type Booking = {
   id: number;
-  name: string;
-  phone: string;
-  email?: string;
   service: string;
   package: string;
   price: number;
-  deposit: number;
-  status: BookingStatus;
-  paymentStatus: PaymentStatus;
+  name: string;
+  phone: string;
   date: string;
-  message?: string;
-  venue?: string;
-  payments: Payment[];
-  notes?: string;
-  createdAt: string;
-  assignedEquipment?: number[];
-  assignedStaff?: number[];
+  message: string;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  deposit?: number;
 };
 
 type SortKey =
@@ -588,7 +580,23 @@ export default function AdminDashboard() {
 
               {selectedBooking.message && (<div><h3 className="text-sm font-semibold text-zinc-400 uppercase mb-3">💬 Client Message</h3><div className="bg-zinc-800 rounded-lg p-4"><p className="text-sm text-zinc-300 whitespace-pre-wrap">{selectedBooking.message}</p></div></div>)}
 
-              {selectedBooking.assignedEquipment?.length > 0 && (<div><h3 className="text-sm font-semibold text-zinc-400 uppercase mb-3">📦 Currently Assigned Equipment</h3><div className="flex flex-wrap gap-2">{selectedBooking.assignedEquipment.map(eqId => { const eq = JSON.parse(localStorage.getItem("equipment") || "[]").find((e:any)=>e.id===eqId); return eq ? <span key={eqId} className="bg-green-900/30 text-green-400 px-3 py-1.5 rounded-full text-sm">📦 {eq.name}</span> : null; })}</div></div>)}
+              {selectedBooking.assignedEquipment && selectedBooking.assignedEquipment.length > 0 && (
+  <div>
+    <h3 className="text-sm font-semibold text-zinc-400 uppercase mb-3">📦 Currently Assigned Equipment</h3>
+    <div className="flex flex-wrap gap-2">
+      {selectedBooking.assignedEquipment.map((eqId) => {
+        const storedEquipment = JSON.parse(localStorage.getItem("equipment") || "[]");
+        const eq = storedEquipment.find((e: any) => e.id === eqId);
+        return eq ? (
+          <span key={eqId} className="bg-green-900/30 text-green-400 px-3 py-1.5 rounded-full text-sm">
+            📦 {eq.name}
+          </span>
+        ) : null;
+      })}
+    </div>
+  </div>
+)}
+
 
               <div><h3 className="text-sm font-semibold text-zinc-400 uppercase mb-3">⚡ Quick Actions</h3><div className="grid grid-cols-2 gap-2"><button onClick={() => window.open(`https://wa.me/${selectedBooking.phone.replace(/\D/g,"")}`,"_blank")} className="bg-green-600 hover:bg-green-700 py-3 rounded-lg font-medium">💬 WhatsApp</button><button onClick={() => setShowContractModal(true)} className="bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium">📄 Generate Contract</button><button onClick={() => sendReminder(selectedBooking)} className="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-medium">🔔 Send Reminder</button><button onClick={() => { setShowDeleteConfirm(selectedBooking.id); setShowBookingDetail(false); }} className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white py-3 rounded-lg font-medium">🗑 Delete Booking</button></div></div>
             </div>
