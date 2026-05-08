@@ -1,174 +1,192 @@
-// components/AnalyticsDashboard.tsx
 "use client";
 
-import { useMemo } from "react";
-import { Booking } from "@/types";
+import { useMemo, useState } from "react";
+
+type Booking = {
+  id: number;
+  name: string;
+  phone: string;
+  email?: string;
+  service: string;
+  package: string;
+  price: number;
+  deposit: number;
+  status: string;
+  paymentStatus: string;
+  date: string;
+  message?: string;
+  venue?: string;
+  notes?: string;
+  createdAt: string;
+  payments?: any[];
+};
 
 type AnalyticsProps = {
   bookings: Booking[];
 };
 
 export default function AnalyticsDashboard({ bookings }: AnalyticsProps) {
-  const analytics = useMemo(() => {
-    const now = new Date();
-    const thisMonth = now.getMonth();
-    const thisYear = now.getFullYear();
+  const [timeRange, setTimeRange] = useState<"week" | "month" | "year" | "all">("all");
 
-    // Basic stats
-    const totalBookings = bookings.length;
-    const completedBookings = bookings.filter(b => b.status === "completed");
-    const pendingBookings = bookings.filter(b => b.status === "pending");
-    const confirmedBookings = bookings.filter(b => b.status === "confirmed");
+  // Filter bookings by time range
+  const filteredBookings = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.setDate(now.getDate() - 7));
+    const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
+    const yearAgo = new Date(now.setFullYear(now.getFullYear() - 1));
+
+    switch (timeRange) {
+      case "week":
+        return bookings.filter(b => new Date(b.date) >= weekAgo);
+      case "month":
+        return bookings.filter(b => new Date(b.date) >= monthAgo);
+      case "year":
+        return bookings.filter(b => new Date(b.date) >= yearAgo);
+      default:
+        return bookings;
+    }
+  }, [bookings, timeRange]);
+
+  const stats = useMemo(() => {
+    const total = filteredBookings.length;
+    const completed = filteredBookings.filter(b => b.status === "completed").length;
+    const pending = filteredBookings.filter(b => b.status === "pending").length;
+    const confirmed = filteredBookings.filter(b => b.status === "confirmed").length;
+    const cancelled = filteredBookings.filter(b => b.status === "cancelled").length;
     
-    // Revenue
-    const totalRevenue = bookings.reduce((sum, b) => sum + b.price, 0);
-    const collectedRevenue = bookings.reduce((sum, b) => sum + (b.deposit || 0), 0);
-    const pendingRevenue = totalRevenue - collectedRevenue;
+    const totalRevenue = filteredBookings
+      .filter(b => b.status === "completed")
+      .reduce((sum, b) => sum + b.price, 0);
     
-    // This month
-    const thisMonthBookings = bookings.filter(b => {
-      const date = new Date(b.date);
-      return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
-    });
-    
-    const thisMonthRevenue = thisMonthBookings.reduce((sum, b) => sum + b.price, 0);
+    const collectedAmount = filteredBookings.reduce((sum, b) => sum + (b.deposit || 0), 0);
+    const pendingBalance = filteredBookings
+      .filter(b => b.status !== "cancelled")
+      .reduce((sum, b) => sum + ((b.price || 0) - (b.deposit || 0)), 0);
     
     // Service breakdown
-    const serviceBreakdown = bookings.reduce((acc: Record<string, { count: number; revenue: number }>, b) => {
-      if (!acc[b.service]) {
-        acc[b.service] = { count: 0, revenue: 0 };
+    const serviceBreakdown: Record<string, number> = {};
+    filteredBookings.forEach(b => {
+      serviceBreakdown[b.service] = (serviceBreakdown[b.service] || 0) + 1;
+    });
+    
+    // Monthly revenue trend
+    const monthlyTrend: Record<string, { revenue: number; bookings: number }> = {};
+    filteredBookings.forEach(b => {
+      const month = new Date(b.date).toLocaleDateString("en-KE", { year: "numeric", month: "short" });
+      if (!monthlyTrend[month]) {
+        monthlyTrend[month] = { revenue: 0, bookings: 0 };
       }
-      acc[b.service].count++;
-      acc[b.service].revenue += b.price;
-      return acc;
-    }, {});
+      monthlyTrend[month].revenue += b.status === "completed" ? b.price : 0;
+      monthlyTrend[month].bookings += 1;
+    });
     
-    // Monthly trends (last 6 months)
-    const monthlyTrends = [];
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(thisYear, thisMonth - i, 1);
-      const monthBookings = bookings.filter(b => {
-        const bDate = new Date(b.date);
-        return bDate.getMonth() === date.getMonth() && bDate.getFullYear() === date.getFullYear();
-      });
-      
-      monthlyTrends.push({
-        month: date.toLocaleString("default", { month: "short" }),
-        bookings: monthBookings.length,
-        revenue: monthBookings.reduce((sum, b) => sum + b.price, 0),
-      });
-    }
+    const conversionRate = total > 0 ? (confirmed / total) * 100 : 0;
+    const completionRate = total > 0 ? (completed / total) * 100 : 0;
+    const avgBookingValue = total > 0 ? totalRevenue / total : 0;
     
-    // Conversion rate
-    const conversionRate = bookings.length > 0 
-      ? (completedBookings.length / bookings.length) * 100 
-      : 0;
-    
-    // Average booking value
-    const avgBookingValue = bookings.length > 0 
-      ? totalRevenue / bookings.length 
-      : 0;
-    
-    // Peak booking days
-    const dayBreakdown = bookings.reduce((acc: Record<string, number>, b) => {
-      const day = new Date(b.date).toLocaleString("default", { weekday: "long" });
-      acc[day] = (acc[day] || 0) + 1;
-      return acc;
-    }, {});
-    
-    // Customer retention
-    const customerBookingCounts = bookings.reduce((acc: Record<string, number>, b) => {
-      acc[b.phone] = (acc[b.phone] || 0) + 1;
-      return acc;
-    }, {});
-    
-    const repeatCustomers = Object.values(customerBookingCounts).filter(count => count > 1).length;
-    const uniqueCustomers = Object.keys(customerBookingCounts).length;
-    const retentionRate = uniqueCustomers > 0 ? (repeatCustomers / uniqueCustomers) * 100 : 0;
-
     return {
-      totalBookings,
-      completedBookings: completedBookings.length,
-      pendingBookings: pendingBookings.length,
-      confirmedBookings: confirmedBookings.length,
+      total,
+      completed,
+      pending,
+      confirmed,
+      cancelled,
       totalRevenue,
-      collectedRevenue,
-      pendingRevenue,
-      thisMonthBookings: thisMonthBookings.length,
-      thisMonthRevenue,
+      collectedAmount,
+      pendingBalance,
       serviceBreakdown,
-      monthlyTrends,
+      monthlyTrend: Object.entries(monthlyTrend).reverse(),
       conversionRate,
+      completionRate,
       avgBookingValue,
-      dayBreakdown,
-      retentionRate,
-      repeatCustomers,
-      uniqueCustomers,
     };
-  }, [bookings]);
+  }, [filteredBookings]);
 
-  const maxMonthlyRevenue = Math.max(...analytics.monthlyTrends.map(t => t.revenue));
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed": return "text-green-400";
+      case "confirmed": return "text-blue-400";
+      case "cancelled": return "text-red-400";
+      default: return "text-yellow-400";
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
+        <p className="text-zinc-400 text-sm mt-1">Track your business performance and insights</p>
+      </div>
+
+      {/* Time Range Filter */}
+      <div className="flex gap-2 bg-zinc-900 rounded-lg p-1 w-fit">
+        {[
+          { key: "week", label: "This Week" },
+          { key: "month", label: "This Month" },
+          { key: "year", label: "This Year" },
+          { key: "all", label: "All Time" },
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setTimeRange(key as any)}
+            className={`px-4 py-2 rounded-lg text-sm transition ${
+              timeRange === key
+                ? "bg-gold-400 text-black font-semibold"
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Key Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-gold-400/20 to-gold-500/10 border border-gold-400/30 rounded-xl p-4">
+          <p className="text-zinc-400 text-sm">Total Bookings</p>
+          <p className="text-3xl font-bold">{stats.total}</p>
+          <div className="flex gap-2 mt-2 text-xs">
+            <span className="text-green-400">✓ {stats.completed}</span>
+            <span className="text-blue-400">📋 {stats.confirmed}</span>
+            <span className="text-yellow-400">⏳ {stats.pending}</span>
+            <span className="text-red-400">✗ {stats.cancelled}</span>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-xl p-4">
           <p className="text-zinc-400 text-sm">Total Revenue</p>
-          <p className="text-2xl font-bold text-green-400">
-            KSh {analytics.totalRevenue.toLocaleString()}
-          </p>
-          <p className="text-xs text-zinc-500 mt-1">
-            Collected: KSh {analytics.collectedRevenue.toLocaleString()}
-          </p>
+          <p className="text-3xl font-bold text-green-400">KSh {stats.totalRevenue.toLocaleString()}</p>
+          <p className="text-xs text-zinc-500 mt-1">From completed bookings</p>
         </div>
         
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-          <p className="text-zinc-400 text-sm">Pending Revenue</p>
-          <p className="text-2xl font-bold text-red-400">
-            KSh {analytics.pendingRevenue.toLocaleString()}
-          </p>
-          <p className="text-xs text-zinc-500 mt-1">
-            From {analytics.pendingBookings} pending bookings
-          </p>
+        <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30 rounded-xl p-4">
+          <p className="text-zinc-400 text-sm">Amount Collected</p>
+          <p className="text-3xl font-bold text-blue-400">KSh {stats.collectedAmount.toLocaleString()}</p>
+          <p className="text-xs text-zinc-500 mt-1">Pending: KSh {stats.pendingBalance.toLocaleString()}</p>
         </div>
         
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/30 rounded-xl p-4">
           <p className="text-zinc-400 text-sm">Conversion Rate</p>
-          <p className="text-2xl font-bold">{analytics.conversionRate.toFixed(1)}%</p>
-          <p className="text-xs text-zinc-500 mt-1">
-            {analytics.completedBookings} completed / {analytics.totalBookings} total
-          </p>
-        </div>
-        
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-          <p className="text-zinc-400 text-sm">Avg Booking Value</p>
-          <p className="text-2xl font-bold">
-            KSh {analytics.avgBookingValue.toFixed(0)}
-          </p>
-          <p className="text-xs text-zinc-500 mt-1">
-            This month: KSh {analytics.thisMonthRevenue.toLocaleString()}
-          </p>
+          <p className="text-3xl font-bold text-purple-400">{stats.conversionRate.toFixed(1)}%</p>
+          <p className="text-xs text-zinc-500 mt-1">Completion: {stats.completionRate.toFixed(1)}%</p>
         </div>
       </div>
 
+      {/* Service Breakdown */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Monthly Trends Chart */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4">Monthly Revenue Trends</h3>
+        <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+          <h3 className="font-semibold mb-4">🎬 Bookings by Service</h3>
           <div className="space-y-3">
-            {analytics.monthlyTrends.map((trend, index) => (
-              <div key={index}>
+            {Object.entries(stats.serviceBreakdown).map(([service, count]) => (
+              <div key={service}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-zinc-400">{trend.month}</span>
-                  <span>KSh {trend.revenue.toLocaleString()}</span>
+                  <span>{service}</span>
+                  <span className="text-gold-400">{count} bookings</span>
                 </div>
-                <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-green-500 transition-all"
-                    style={{
-                      width: `${maxMonthlyRevenue > 0 ? (trend.revenue / maxMonthlyRevenue) * 100 : 0}%`,
-                    }}
+                <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gold-400 rounded-full"
+                    style={{ width: `${(count / stats.total) * 100}%` }}
                   />
                 </div>
               </div>
@@ -176,84 +194,91 @@ export default function AnalyticsDashboard({ bookings }: AnalyticsProps) {
           </div>
         </div>
 
-        {/* Service Breakdown */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4">Revenue by Service</h3>
-          <div className="space-y-4">
-            {Object.entries(analytics.serviceBreakdown)
-              .sort(([, a], [, b]) => b.revenue - a.revenue)
-              .map(([service, data]) => (
-                <div key={service}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>{service}</span>
-                    <span className="text-zinc-400">
-                      {data.count} bookings • KSh {data.revenue.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500"
-                      style={{
-                        width: `${(data.revenue / analytics.totalRevenue) * 100}%`,
-                      }}
-                    />
-                  </div>
+        {/* Status Distribution */}
+        <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+          <h3 className="font-semibold mb-4">📊 Booking Status Distribution</h3>
+          <div className="space-y-3">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-green-400">Completed</span>
+                <span>{stats.completed}</span>
+              </div>
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 rounded-full" style={{ width: `${(stats.completed / stats.total) * 100}%` }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-blue-400">Confirmed</span>
+                <span>{stats.confirmed}</span>
+              </div>
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(stats.confirmed / stats.total) * 100}%` }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-yellow-400">Pending</span>
+                <span>{stats.pending}</span>
+              </div>
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${(stats.pending / stats.total) * 100}%` }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-red-400">Cancelled</span>
+                <span>{stats.cancelled}</span>
+              </div>
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full bg-red-500 rounded-full" style={{ width: `${(stats.cancelled / stats.total) * 100}%` }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Monthly Trend */}
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+        <h3 className="font-semibold mb-4">📈 Monthly Revenue Trend</h3>
+        <div className="space-y-3 max-h-64 overflow-y-auto">
+          {stats.monthlyTrend.map(([month, data]) => (
+            <div key={month}>
+              <div className="flex justify-between text-sm mb-1">
+                <span>{month}</span>
+                <div className="flex gap-4">
+                  <span className="text-green-400">KSh {data.revenue.toLocaleString()}</span>
+                  <span className="text-zinc-500">{data.bookings} bookings</span>
                 </div>
-              ))}
-          </div>
+              </div>
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-green-500 rounded-full"
+                  style={{ width: `${Math.min(100, (data.revenue / stats.totalRevenue) * 100)}%` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Booking Status Distribution */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4">Booking Status</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                <span>Pending</span>
-              </div>
-              <span className="font-bold">{analytics.pendingBookings}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span>Confirmed</span>
-              </div>
-              <span className="font-bold">{analytics.confirmedBookings}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-green-500" />
-                <span>Completed</span>
-              </div>
-              <span className="font-bold">{analytics.completedBookings}</span>
-            </div>
-          </div>
+      {/* Quick Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-zinc-900/30 rounded-lg p-3 text-center">
+          <p className="text-xs text-zinc-400">Avg. Booking Value</p>
+          <p className="text-lg font-bold">KSh {Math.round(stats.avgBookingValue).toLocaleString()}</p>
         </div>
-
-        {/* Customer Insights */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4">Customer Insights</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-zinc-400 text-sm">Unique Customers</p>
-              <p className="text-2xl font-bold">{analytics.uniqueCustomers}</p>
-            </div>
-            <div>
-              <p className="text-zinc-400 text-sm">Repeat Customers</p>
-              <p className="text-2xl font-bold">{analytics.repeatCustomers}</p>
-            </div>
-            <div>
-              <p className="text-zinc-400 text-sm">Retention Rate</p>
-              <p className="text-2xl font-bold">{analytics.retentionRate.toFixed(1)}%</p>
-            </div>
-            <div>
-              <p className="text-zinc-400 text-sm">Avg per Customer</p>
-              <p className="text-2xl font-bold">
-                KSh {(analytics.totalRevenue / Math.max(analytics.uniqueCustomers, 1)).toFixed(0)}
-              </p>
-            </div>
-          </div>
+        <div className="bg-zinc-900/30 rounded-lg p-3 text-center">
+          <p className="text-xs text-zinc-400">Unique Services</p>
+          <p className="text-lg font-bold">{Object.keys(stats.serviceBreakdown).length}</p>
+        </div>
+        <div className="bg-zinc-900/30 rounded-lg p-3 text-center">
+          <p className="text-xs text-zinc-400">Collection Rate</p>
+          <p className="text-lg font-bold">{stats.totalRevenue > 0 ? ((stats.collectedAmount / stats.totalRevenue) * 100).toFixed(1) : 0}%</p>
+        </div>
+        <div className="bg-zinc-900/30 rounded-lg p-3 text-center">
+          <p className="text-xs text-zinc-400">Avg. per Booking</p>
+          <p className="text-lg font-bold">KSh {stats.total > 0 ? Math.round(stats.collectedAmount / stats.total).toLocaleString() : 0}</p>
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ export default function DashboardLogin() {
         localStorage.setItem("adminLoginTime", Date.now().toString());
         window.location.href = "/dashboard";
       } else {
-        setError("Incorrect password. Use: admin123");
+        setError("Incorrect password. Use: We cant tell you bana");
         setPassword("");
         setIsLoading(false);
       }
@@ -83,7 +83,7 @@ export default function DashboardLogin() {
                 </button>
               </div>
               <p className="text-xs text-zinc-500 mt-2">
-                Default password: <span className="text-gold-400">admin123</span>
+                Default password: <span className="text-gold-400">still confidential</span>
               </p>
             </div>
 
