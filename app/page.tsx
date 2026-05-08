@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import { useEffect, useRef, useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { createBooking, getBookings } from "@/lib/supabase/db";
 
 /* ---------------- TYPES ---------------- */
 type PackageFeature = string;
@@ -49,7 +50,6 @@ type PortfolioImage = {
 };
 
 /* ---------------- PORTFOLIO DATA WITH LOCAL IMAGES ---------------- */
-// REPLACE THESE WITH YOUR ACTUAL IMAGE PATHS
 const PORTFOLIO_IMAGES: PortfolioImage[] = [
   // Wedding Category
   {
@@ -588,15 +588,29 @@ export default function Home() {
     message: "",
   });
 
-  /* ---------------- LOAD BOOKINGS ---------------- */
+  /* ---------------- LOAD BOOKINGS FROM SUPABASE ---------------- */
   useEffect(() => {
-    try {
-      const data = JSON.parse(localStorage.getItem("bookings") || "[]");
-      setBookings(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Failed to load bookings:", error);
-      setBookings([]);
-    }
+    const loadBookings = async () => {
+      try {
+        const data = await getBookings();
+        const formatted = data.map((b: any) => ({
+          id: b.booking_id,
+          service: b.service,
+          package: b.package,
+          price: b.price,
+          name: b.name,
+          phone: b.phone,
+          date: b.event_date,
+          message: b.message,
+          status: b.status,
+          deposit: b.deposit,
+        }));
+        setBookings(formatted);
+      } catch (error) {
+        console.error("Failed to load bookings from Supabase:", error);
+      }
+    };
+    loadBookings();
   }, []);
 
   /* ---------------- FILTERED PORTFOLIO ---------------- */
@@ -637,7 +651,7 @@ export default function Home() {
     });
   };
 
-  /* ---------------- DAILY LIMIT ---------------- */
+  /* ---------------- DAILY LIMIT (using Supabase data) ---------------- */
   const getBookingsForDate = (date: string) => {
     return bookings.filter((b) => b.date === date && b.status !== "cancelled");
   };
@@ -697,7 +711,7 @@ export default function Home() {
     }, 100);
   };
 
-  /* ---------------- SEND BOOKING ---------------- */
+  /* ---------------- SEND BOOKING TO SUPABASE ---------------- */
   const sendBooking = async () => {
     const error = validate();
     if (error) {
@@ -708,45 +722,61 @@ export default function Home() {
     setIsSubmitting(true);
 
     try {
-      const booking: Booking = {
-        id: Date.now(),
+      const bookingId = Date.now();
+      const bookingData = {
+        booking_id: bookingId,
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: "",
         service: selectedService!.title,
         package: selectedPackage!.name,
         price: selectedPackage!.price,
-        name: form.name.trim(),
-        phone: form.phone.trim(),
-        date: form.date,
+        deposit: 0,
+        status: "pending",
+        payment_status: "unpaid",
+        event_date: form.date,
         message: form.message.trim(),
+        venue: "",
+        notes: "",
+      };
+
+      await createBooking(bookingData);
+
+      // Update local state for date availability
+      const newBooking: Booking = {
+        id: bookingId,
+        service: bookingData.service,
+        package: bookingData.package,
+        price: bookingData.price,
+        name: bookingData.name,
+        phone: bookingData.phone,
+        date: bookingData.event_date,
+        message: bookingData.message,
         status: "pending",
         deposit: 0,
       };
+      setBookings(prev => [...prev, newBooking]);
 
-      const updatedBookings = [...bookings, booking];
-      localStorage.setItem("bookings", JSON.stringify(updatedBookings));
-      setBookings(updatedBookings);
-
+      // WhatsApp message
       const msg = `🎬 *NEW BOOKING REQUEST - Alakara Studios*
 
-*Service:* ${booking.service}
-*Package:* ${booking.package}
-*Price:* KES ${booking.price.toLocaleString()}
+*Service:* ${bookingData.service}
+*Package:* ${bookingData.package}
+*Price:* KES ${bookingData.price.toLocaleString()}
 
 *Client Details:*
-👤 Name: ${booking.name}
-📞 Phone: ${booking.phone}
-📅 Date: ${formatDisplayDate(booking.date)}
-${booking.message ? `📝 Notes: ${booking.message}` : ""}
+👤 Name: ${bookingData.name}
+📞 Phone: ${bookingData.phone}
+📅 Date: ${formatDisplayDate(bookingData.event_date)}
+${bookingData.message ? `📝 Notes: ${bookingData.message}` : ""}
 
 *Portal Access:*
-🔗 View & manage your booking: https://alakara-studios.vercel.app/portal
-🔑 Login with Booking ID: ${booking.id} and Phone: ${booking.phone}
+🔗 View & manage your booking: ${window.location.origin}/portal
+🔑 Login with Booking ID: ${bookingId} and Phone: ${bookingData.phone}
 
 _Keep this message for your records_`;
 
-      window.open(
-        `https://wa.me/254797356421?text=${encodeURIComponent(msg)}`,
-        "_blank"
-      );
+      window.open(`https://wa.me/254797356421?text=${encodeURIComponent(msg)}`, "_blank");
 
       setForm({
         name: "",
@@ -758,13 +788,14 @@ _Keep this message for your records_`;
       setSelectedPackage(null);
 
       setToast({ 
-        message: `Booking successful! Booking ID: ${booking.id}. Check WhatsApp for details.`, 
+        message: `Booking successful! Booking ID: ${bookingId}. Check WhatsApp for details.`, 
         type: "success" 
       });
 
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error) {
-      setToast({ message: "Failed to save booking. Please try again.", type: "error" });
+    } catch (err: any) {
+      console.error("Supabase error:", err);
+      setToast({ message: `Failed to save booking: ${err?.message || "Unknown error"}`, type: "error" });
     } finally {
       setIsSubmitting(false);
     }
