@@ -441,7 +441,7 @@ const SERVICES: Service[] = [
   // ⬇️ NEW MUSIC VIDEO SERVICE ⬇️
   {
     id: "music-video",
-    title: "Music Video",
+    title: "Choir and Music Videos",
     description: "Professional music video production for artists and choirs",
     icon: "🎵",
     packages: [
@@ -490,29 +490,25 @@ const SERVICES: Service[] = [
       },
       {
         id: "choir1",
-        name: "Choir Recording (No Drone)",
+        name: "Choir Video shooting (No Drone)",
         price: 100000,
         features: [
           "10 Songs",
           "Multi-Camera Setup (3 cameras)",
-          "Professional Audio Recording",
-          "Audio Mixing & Mastering",
-          "Full Concert Editing",
+          "Full Editing",
           "Individual Song Videos",
           "Digital Delivery",
         ],
       },
       {
         id: "choir2",
-        name: "Choir Recording (with Drone)",
+        name: "Choir Video (with Drone)",
         price: 150000,
         features: [
           "10 Songs",
           "Multi-Camera Setup (3 cameras + drone)",
-          "Professional Audio Recording",
-          "Audio Mixing & Mastering",
-          "Aerial Concert Shots",
-          "Full Concert Editing",
+          "Aerial Shots",
+          "Full Editing",
           "Individual Song Videos",
           "Digital + USB Delivery",
           "30 sec Promo Reel",
@@ -575,7 +571,7 @@ const SERVICES: Service[] = [
 /* ---------------- CUSTOM COLOR SCHEME ---------------- */
 const COLORS = {
   primary: "#C6A43F",
-  primaryDark: "#A8872D",
+  primaryDark: "#b89024",
   primaryLight: "#D4B96A",
   secondary: "#1A1A1A",
   secondaryLight: "#2A2A2A",
@@ -963,7 +959,7 @@ _Keep this message for your records_`;
               className="px-8 py-4 rounded-full text-lg font-semibold transition border"
               style={{ borderColor: COLORS.primary, color: COLORS.textPrimary }}
             >
-              Customer Portal →
+              View Your Bookings →
             </a>
           </div>
         </div>
