@@ -199,6 +199,8 @@ const PORTFOLIO_IMAGES: PortfolioImage[] = [
   },
 ];
 
+
+
 /* ---------------- SERVICES ---------------- */
 const SERVICES: Service[] = [
   {
@@ -575,6 +577,7 @@ const SERVICES: Service[] = [
   },
 ];
 
+
 /* ---------------- CUSTOM COLOR SCHEME ---------------- */
 const COLORS = {
   primary: "#C6A43F",
@@ -702,6 +705,8 @@ export default function Home() {
     null,
   );
   const [hoveredImage, setHoveredImage] = useState<number | null>(null);
+  const [showBookingSuccessModal, setShowBookingSuccessModal] = useState(false);
+const [lastBookingDetails, setLastBookingDetails] = useState<any>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -845,6 +850,7 @@ export default function Home() {
   };
 
   /* ---------------- SEND BOOKING TO SUPABASE ---------------- */
+  /* ---------------- SEND BOOKING TO SUPABASE ---------------- */
   const sendBooking = async () => {
     const error = validate();
     if (error) {
@@ -875,7 +881,7 @@ export default function Home() {
 
       await createBooking(bookingData);
 
-      // Update local state for date availability
+      // Create a properly typed new booking
       const newBooking: Booking = {
         id: bookingId,
         service: bookingData.service,
@@ -890,43 +896,18 @@ export default function Home() {
       };
       setBookings((prev) => [...prev, newBooking]);
 
-      // WhatsApp message
-      const msg = `🎬 *NEW BOOKING REQUEST - Alakara Studios*
-
-*Service:* ${bookingData.service}
-*Package:* ${bookingData.package}
-*Price:* KES ${bookingData.price.toLocaleString()}
-
-*Client Details:*
-👤 Name: ${bookingData.name}
-📞 Phone: ${bookingData.phone}
-📅 Date: ${formatDisplayDate(bookingData.event_date)}
-${bookingData.message ? `📝 Notes: ${bookingData.message}` : ""}
-
-*Portal Access:*
-🔗 View & manage your booking: ${window.location.origin}/portal
-🔑 Login with Booking ID: ${bookingId} and Phone: ${bookingData.phone}
-
-_Keep this message for your records_`;
-
-      window.open(
-        `https://wa.me/254797356421?text=${encodeURIComponent(msg)}`,
-        "_blank",
-      );
-
-      setForm({
-        name: "",
-        phone: "",
-        date: "",
-        message: "",
+      // Store details for the success modal
+      setLastBookingDetails({
+        bookingId,
+        ...bookingData,
+        displayDate: formatDisplayDate(bookingData.event_date),
       });
+      setShowBookingSuccessModal(true); // Show modal (no automatic WhatsApp opening)
+
+      // Reset form and selection
+      setForm({ name: "", phone: "", date: "", message: "" });
       setSelectedService(null);
       setSelectedPackage(null);
-
-      setToast({
-        message: `Booking successful! Booking ID: ${bookingId}. Check WhatsApp for details.`,
-        type: "success",
-      });
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
@@ -1648,6 +1629,146 @@ _Keep this message for your records_`;
           animation: slideIn 0.3s ease-out;
         }
       `}</style>
+
+      {/* Booking Success Modal - Shows Booking ID and message options */}
+      {showBookingSuccessModal && lastBookingDetails && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto">
+            <div className="sticky top-0 bg-zinc-900 p-5 border-b border-zinc-800 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-green-400">
+                ✅ Booking Saved!
+              </h2>
+              <button
+                onClick={() => setShowBookingSuccessModal(false)}
+                className="text-zinc-400 hover:text-white text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Booking ID - Highlighted */}
+              <div className="text-center bg-zinc-800 rounded-xl p-5">
+                <p className="text-sm text-zinc-400 mb-1">Your Booking ID</p>
+                <p className="text-3xl md:text-4xl font-mono font-bold text-gold-400 tracking-wider">
+                  {lastBookingDetails.bookingId}
+                </p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      lastBookingDetails.bookingId.toString(),
+                    );
+                    setToast({
+                      message: "Booking ID copied!",
+                      type: "success",
+                    });
+                    setTimeout(() => setToast(null), 2000);
+                  }}
+                  className="mt-3 text-sm text-gold-400 hover:underline inline-flex items-center gap-1"
+                >
+                  📋 Copy Booking ID
+                </button>
+              </div>
+
+              {/* Booking Summary */}
+              <div className="bg-zinc-800/50 rounded-xl p-4 space-y-2">
+                <h3 className="font-semibold mb-2">Booking Summary</h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <span className="text-zinc-400">Service:</span>
+                  <span>{lastBookingDetails.service}</span>
+                  <span className="text-zinc-400">Package:</span>
+                  <span>{lastBookingDetails.package}</span>
+                  <span className="text-zinc-400">Event Date:</span>
+                  <span>{lastBookingDetails.displayDate}</span>
+                  <span className="text-zinc-400">Total Amount:</span>
+                  <span className="text-gold-400">
+                    KES {lastBookingDetails.price.toLocaleString()}
+                  </span>
+                  <span className="text-zinc-400">Deposit Required (50%):</span>
+                  <span className="text-gold-400">
+                    KES{" "}
+                    {Math.ceil(lastBookingDetails.price / 2).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* WhatsApp Message Section */}
+              <div className="space-y-3">
+                <p className="text-sm text-zinc-300">
+                  To confirm your booking, please send the following message to
+                  our WhatsApp support:
+                </p>
+                <div className="bg-black rounded-xl p-4 border border-zinc-700">
+                  <pre className="text-sm text-zinc-300 whitespace-pre-wrap font-sans break-words">
+                    {`🎬 *NEW BOOKING REQUEST*
+
+Booking ID: ${lastBookingDetails.bookingId}
+Service: ${lastBookingDetails.service}
+Package: ${lastBookingDetails.package}
+Event Date: ${lastBookingDetails.displayDate}
+Total: KES ${lastBookingDetails.price.toLocaleString()}
+Deposit Required: KES ${Math.ceil(lastBookingDetails.price / 2).toLocaleString()} (50%)
+
+My Details:
+Name: ${lastBookingDetails.name}
+Phone: ${lastBookingDetails.phone}
+${lastBookingDetails.message ? `Message: ${lastBookingDetails.message}` : ""}
+
+I will send the deposit shortly.`}
+                  </pre>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      const fullMessage = `🎬 *NEW BOOKING REQUEST*\n\nBooking ID: ${lastBookingDetails.bookingId}\nService: ${lastBookingDetails.service}\nPackage: ${lastBookingDetails.package}\nEvent Date: ${lastBookingDetails.displayDate}\nTotal: KES ${lastBookingDetails.price.toLocaleString()}\nDeposit Required: KES ${Math.ceil(lastBookingDetails.price / 2).toLocaleString()} (50%)\n\nMy Details:\nName: ${lastBookingDetails.name}\nPhone: ${lastBookingDetails.phone}\n${lastBookingDetails.message ? `Message: ${lastBookingDetails.message}` : ""}\n\nI will send the deposit shortly.`;
+                      navigator.clipboard.writeText(fullMessage);
+                      setToast({
+                        message: "Message copied to clipboard!",
+                        type: "success",
+                      });
+                      setTimeout(() => setToast(null), 2000);
+                    }}
+                    className="flex-1 py-2.5 bg-gold-400 text-black rounded-lg font-semibold hover:bg-gold-500 transition flex items-center justify-center gap-2"
+                  >
+                    📋 Copy Message
+                  </button>
+                  <a
+                    href={`https://wa.me/254797356421?text=${encodeURIComponent(
+                      `🎬 *NEW BOOKING REQUEST*\n\nBooking ID: ${lastBookingDetails.bookingId}\nService: ${lastBookingDetails.service}\nPackage: ${lastBookingDetails.package}\nEvent Date: ${lastBookingDetails.displayDate}\nTotal: KES ${lastBookingDetails.price.toLocaleString()}\nDeposit Required: KES ${Math.ceil(lastBookingDetails.price / 2).toLocaleString()} (50%)\n\nMy Details:\nName: ${lastBookingDetails.name}\nPhone: ${lastBookingDetails.phone}\n${lastBookingDetails.message ? `Message: ${lastBookingDetails.message}` : ""}\n\nI will send the deposit shortly.`,
+                    )}`}
+                    target="_blank"
+                    className="flex-1 bg-green-600 text-white py-2.5 rounded-lg font-semibold text-center hover:bg-green-700 transition flex items-center justify-center gap-2"
+                  >
+                    💬 Open WhatsApp
+                  </a>
+                </div>
+              </div>
+
+              {/* Important Note */}
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+                <p className="text-sm text-yellow-400 flex items-start gap-2">
+                  <span>⚠️</span>
+                  <span>
+                    <strong>
+                      Your booking is not confirmed until we receive the 50%
+                      deposit.
+                    </strong>{" "}
+                    Please send the message above and complete the deposit to
+                    secure your event date.
+                  </span>
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowBookingSuccessModal(false)}
+                className="w-full py-3 bg-zinc-800 text-white rounded-xl font-semibold hover:bg-zinc-700 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
