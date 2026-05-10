@@ -38,7 +38,14 @@ type Booking = {
   paymentStatus?: string;
 };
 
-type PortfolioCategory = "all" | "wedding" | "traditional" | "corporate" | "podcast" | "documentary" | "studio";
+type PortfolioCategory =
+  | "all"
+  | "wedding"
+  | "traditional"
+  | "corporate"
+  | "podcast"
+  | "documentary"
+  | "studio";
 
 type PortfolioImage = {
   id: number;
@@ -84,7 +91,7 @@ const PORTFOLIO_IMAGES: PortfolioImage[] = [
     description: "Magical first dance moments",
     date: "2023",
   },
-  
+
   // Traditional Ceremony
   {
     id: 5,
@@ -102,7 +109,7 @@ const PORTFOLIO_IMAGES: PortfolioImage[] = [
     description: "Traditional dance performances",
     date: "2024",
   },
-  
+
   // Corporate Events
   {
     id: 7,
@@ -128,7 +135,7 @@ const PORTFOLIO_IMAGES: PortfolioImage[] = [
     description: "Corporate team building events",
     date: "2024",
   },
-  
+
   // Podcast
   {
     id: 10,
@@ -146,7 +153,7 @@ const PORTFOLIO_IMAGES: PortfolioImage[] = [
     description: "Studio interview recording",
     date: "2024",
   },
-  
+
   // Documentary
   {
     id: 12,
@@ -164,7 +171,7 @@ const PORTFOLIO_IMAGES: PortfolioImage[] = [
     description: "Documentary production BTS",
     date: "2024",
   },
-  
+
   // Studio
   {
     id: 14,
@@ -387,7 +394,7 @@ const SERVICES: Service[] = [
       },
     ],
   },
-    {
+  {
     id: "documentary",
     title: "Documentary",
     description: "Tell your story with cinematic excellence",
@@ -589,18 +596,34 @@ const COLORS = {
 /* ---------------- TOAST COMPONENT ---------------- */
 type ToastType = "success" | "error" | "info";
 
-const Toast = ({ message, type, onClose }: { message: string; type: ToastType; onClose: () => void }) => {
+const Toast = ({
+  message,
+  type,
+  onClose,
+}: {
+  message: string;
+  type: ToastType;
+  onClose: () => void;
+}) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 5000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bgColor = type === "success" ? COLORS.success : type === "error" ? COLORS.error : COLORS.primary;
-  
+  const bgColor =
+    type === "success"
+      ? COLORS.success
+      : type === "error"
+        ? COLORS.error
+        : COLORS.primary;
+
   return (
     <div
       className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-sm font-medium animate-slide-in`}
-      style={{ backgroundColor: bgColor, color: type === "success" ? "#000" : "#fff" }}
+      style={{
+        backgroundColor: bgColor,
+        color: type === "success" ? "#000" : "#fff",
+      }}
     >
       {message}
     </div>
@@ -608,7 +631,13 @@ const Toast = ({ message, type, onClose }: { message: string; type: ToastType; o
 };
 
 /* ---------------- LIGHTBOX COMPONENT ---------------- */
-const Lightbox = ({ image, onClose }: { image: PortfolioImage | null; onClose: () => void }) => {
+const Lightbox = ({
+  image,
+  onClose,
+}: {
+  image: PortfolioImage | null;
+  onClose: () => void;
+}) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -624,7 +653,10 @@ const Lightbox = ({ image, onClose }: { image: PortfolioImage | null; onClose: (
       className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="relative max-w-5xl w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           onClick={onClose}
           className="absolute -top-12 right-0 text-white hover:text-[#C6A43F] transition"
@@ -636,13 +668,16 @@ const Lightbox = ({ image, onClose }: { image: PortfolioImage | null; onClose: (
           alt={image.title}
           className="w-full h-auto rounded-xl"
           onError={(e) => {
-            e.currentTarget.src = "https://placehold.co/800x600/1a1a1a/ffffff?text=Image+Coming+Soon";
+            e.currentTarget.src =
+              "https://placehold.co/800x600/1a1a1a/ffffff?text=Image+Coming+Soon";
           }}
         />
         <div className="mt-4 text-center">
           <h3 className="text-xl font-bold text-white">{image.title}</h3>
           <p className="text-zinc-400 mt-1">{image.description}</p>
-          <p className="text-sm mt-2" style={{ color: COLORS.primary }}>{image.date}</p>
+          <p className="text-sm mt-2" style={{ color: COLORS.primary }}>
+            {image.date}
+          </p>
         </div>
       </div>
     </div>
@@ -652,12 +687,20 @@ const Lightbox = ({ image, onClose }: { image: PortfolioImage | null; onClose: (
 export default function Home() {
   const packagesRef = useRef<HTMLDivElement | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [selectedPackage, setSelectedPackage] = useState<ServicePackage | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<ServicePackage | null>(
+    null,
+  );
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: ToastType;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [portfolioCategory, setPortfolioCategory] = useState<PortfolioCategory>("all");
-  const [selectedImage, setSelectedImage] = useState<PortfolioImage | null>(null);
+  const [portfolioCategory, setPortfolioCategory] =
+    useState<PortfolioCategory>("all");
+  const [selectedImage, setSelectedImage] = useState<PortfolioImage | null>(
+    null,
+  );
   const [hoveredImage, setHoveredImage] = useState<number | null>(null);
 
   const [form, setForm] = useState({
@@ -695,19 +738,27 @@ export default function Home() {
   /* ---------------- FILTERED PORTFOLIO ---------------- */
   const filteredPortfolio = useMemo(() => {
     if (portfolioCategory === "all") return PORTFOLIO_IMAGES;
-    return PORTFOLIO_IMAGES.filter(img => img.category === portfolioCategory);
+    return PORTFOLIO_IMAGES.filter((img) => img.category === portfolioCategory);
   }, [portfolioCategory]);
 
   /* ---------------- CATEGORY COUNTS ---------------- */
   const categoryCounts = useMemo(() => {
     const counts: Record<PortfolioCategory, number> = {
       all: PORTFOLIO_IMAGES.length,
-      wedding: PORTFOLIO_IMAGES.filter(img => img.category === "wedding").length,
-      traditional: PORTFOLIO_IMAGES.filter(img => img.category === "traditional").length,
-      corporate: PORTFOLIO_IMAGES.filter(img => img.category === "corporate").length,
-      podcast: PORTFOLIO_IMAGES.filter(img => img.category === "podcast").length,
-      documentary: PORTFOLIO_IMAGES.filter(img => img.category === "documentary").length,
-      studio: PORTFOLIO_IMAGES.filter(img => img.category === "studio").length,
+      wedding: PORTFOLIO_IMAGES.filter((img) => img.category === "wedding")
+        .length,
+      traditional: PORTFOLIO_IMAGES.filter(
+        (img) => img.category === "traditional",
+      ).length,
+      corporate: PORTFOLIO_IMAGES.filter((img) => img.category === "corporate")
+        .length,
+      podcast: PORTFOLIO_IMAGES.filter((img) => img.category === "podcast")
+        .length,
+      documentary: PORTFOLIO_IMAGES.filter(
+        (img) => img.category === "documentary",
+      ).length,
+      studio: PORTFOLIO_IMAGES.filter((img) => img.category === "studio")
+        .length,
     };
     return counts;
   }, []);
@@ -731,14 +782,13 @@ export default function Home() {
   };
 
   /* ---------------- DAILY LIMIT (using Supabase data) ---------------- */
-const getBookingsForDate = (date: string) => {
-  return bookings.filter((b) => b.date === date);
-};
+  const getBookingsForDate = (date: string) => {
+    return bookings.filter((b) => b.date === date);
+  };
 
-const isDateFullyBooked = (date: string) => {
-  return getBookingsForDate(date).length >= 2;
-};
-
+  const isDateFullyBooked = (date: string) => {
+    return getBookingsForDate(date).length >= 2;
+  };
 
   /* ---------------- FILTER AVAILABLE DATES ---------------- */
   const filterAvailableDates = (date: Date) => {
@@ -749,16 +799,17 @@ const isDateFullyBooked = (date: string) => {
   /* ---------------- VALIDATION ---------------- */
   const validate = (): string | null => {
     if (!form.name.trim()) return "Please enter your name";
-    if (form.name.trim().length < 2) return "Name must be at least 2 characters";
-    
+    if (form.name.trim().length < 2)
+      return "Name must be at least 2 characters";
+
     if (!form.phone.trim()) return "Please enter your phone number";
     const phoneRegex = /^(\+?254|0)?[71]\d{8}$/;
     if (!phoneRegex.test(form.phone.replace(/\s/g, ""))) {
       return "Please enter a valid Kenyan phone number";
     }
-    
+
     if (!form.date) return "Please select an event date";
-    
+
     if (!selectedService || !selectedPackage) {
       return "Please select a service and package";
     }
@@ -771,7 +822,9 @@ const isDateFullyBooked = (date: string) => {
   };
 
   /* ---------------- INPUT CHANGE ---------------- */
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
@@ -782,7 +835,7 @@ const isDateFullyBooked = (date: string) => {
   const handleServiceClick = (service: Service) => {
     setSelectedService(service);
     setSelectedPackage(null);
-    
+
     setTimeout(() => {
       packagesRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -835,7 +888,7 @@ const isDateFullyBooked = (date: string) => {
         status: "pending",
         deposit: 0,
       };
-      setBookings(prev => [...prev, newBooking]);
+      setBookings((prev) => [...prev, newBooking]);
 
       // WhatsApp message
       const msg = `🎬 *NEW BOOKING REQUEST - Alakara Studios*
@@ -856,7 +909,10 @@ ${bookingData.message ? `📝 Notes: ${bookingData.message}` : ""}
 
 _Keep this message for your records_`;
 
-      window.open(`https://wa.me/254797356421?text=${encodeURIComponent(msg)}`, "_blank");
+      window.open(
+        `https://wa.me/254797356421?text=${encodeURIComponent(msg)}`,
+        "_blank",
+      );
 
       setForm({
         name: "",
@@ -867,15 +923,18 @@ _Keep this message for your records_`;
       setSelectedService(null);
       setSelectedPackage(null);
 
-      setToast({ 
-        message: `Booking successful! Booking ID: ${bookingId}. Check WhatsApp for details.`, 
-        type: "success" 
+      setToast({
+        message: `Booking successful! Booking ID: ${bookingId}. Check WhatsApp for details.`,
+        type: "success",
       });
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       console.error("Supabase error:", err);
-      setToast({ message: `Failed to save booking: ${err?.message || "Unknown error"}`, type: "error" });
+      setToast({
+        message: `Failed to save booking: ${err?.message || "Unknown error"}`,
+        type: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -892,7 +951,10 @@ _Keep this message for your records_`;
   };
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: COLORS.bgPrimary, color: COLORS.textPrimary }}>
+    <main
+      className="min-h-screen"
+      style={{ backgroundColor: COLORS.bgPrimary, color: COLORS.textPrimary }}
+    >
       <Navbar />
 
       {/* TOAST NOTIFICATION */}
@@ -918,7 +980,10 @@ _Keep this message for your records_`;
             backgroundImage: "url('/images/portfolio/hero/bg.jpg')",
           }}
         />
-        <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.75)" }} />
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(0,0,0,0.75)" }}
+        />
 
         <div className="relative z-10 max-w-4xl mx-auto">
           <div className="mb-6">
@@ -926,7 +991,9 @@ _Keep this message for your records_`;
             <h1 className="text-5xl md:text-7xl font-bold mb-2">
               Alakara <span style={{ color: COLORS.primary }}>Studios</span>
             </h1>
-            <p className="text-xl" style={{ color: COLORS.primary }}>Where Moments Become Memories</p>
+            <p className="text-xl" style={{ color: COLORS.primary }}>
+              Where Moments Become Memories
+            </p>
           </div>
           <p className="text-xl md:text-2xl text-zinc-300 mb-8">
             Professional Photography & Videography Services
@@ -934,20 +1001,24 @@ _Keep this message for your records_`;
           <div className="flex flex-wrap gap-4 justify-center">
             <button
               onClick={() =>
-                document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth" })
+                document
+                  .getElementById("portfolio")
+                  ?.scrollIntoView({ behavior: "smooth" })
               }
               className="backdrop-blur-sm border px-8 py-4 rounded-full text-lg font-semibold transition"
-              style={{ 
-                backgroundColor: `${COLORS.primary}20`, 
+              style={{
+                backgroundColor: `${COLORS.primary}20`,
                 borderColor: COLORS.primary,
-                color: COLORS.textPrimary
+                color: COLORS.textPrimary,
               }}
             >
               View Portfolio
             </button>
             <button
               onClick={() =>
-                document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })
+                document
+                  .getElementById("services")
+                  ?.scrollIntoView({ behavior: "smooth" })
               }
               className="px-8 py-4 rounded-full text-lg font-semibold transition"
               style={{ backgroundColor: COLORS.primary, color: "#000" }}
@@ -973,34 +1044,47 @@ _Keep this message for your records_`;
             <p className="text-zinc-400 max-w-2xl mx-auto">
               Explore our recent work across different events and productions
             </p>
-            <div 
+            <div
               className="w-20 h-1 mx-auto mt-4 rounded-full"
-              style={{ background: `linear-gradient(to right, ${COLORS.primary}, transparent)` }}
+              style={{
+                background: `linear-gradient(to right, ${COLORS.primary}, transparent)`,
+              }}
             />
           </div>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
-            {(Object.keys(categoryLabels) as PortfolioCategory[]).map((category) => (
-              <button
-                key={category}
-                onClick={() => setPortfolioCategory(category)}
-                className={`px-6 py-2 rounded-full transition-all duration-300 ${
-                  portfolioCategory === category
-                    ? "font-semibold shadow-lg scale-105"
-                    : "border text-zinc-400 hover:text-white"
-                }`}
-                style={{
-                  backgroundColor: portfolioCategory === category ? COLORS.primary : "transparent",
-                  color: portfolioCategory === category ? "#000" : COLORS.textSecondary,
-                  borderColor: portfolioCategory === category ? COLORS.primary : COLORS.secondaryLight,
-                }}
-              >
-                {categoryLabels[category]}
-                <span className="ml-2 text-xs opacity-60">
-                  ({categoryCounts[category]})
-                </span>
-              </button>
-            ))}
+            {(Object.keys(categoryLabels) as PortfolioCategory[]).map(
+              (category) => (
+                <button
+                  key={category}
+                  onClick={() => setPortfolioCategory(category)}
+                  className={`px-6 py-2 rounded-full transition-all duration-300 ${
+                    portfolioCategory === category
+                      ? "font-semibold shadow-lg scale-105"
+                      : "border text-zinc-400 hover:text-white"
+                  }`}
+                  style={{
+                    backgroundColor:
+                      portfolioCategory === category
+                        ? COLORS.primary
+                        : "transparent",
+                    color:
+                      portfolioCategory === category
+                        ? "#000"
+                        : COLORS.textSecondary,
+                    borderColor:
+                      portfolioCategory === category
+                        ? COLORS.primary
+                        : COLORS.secondaryLight,
+                  }}
+                >
+                  {categoryLabels[category]}
+                  <span className="ml-2 text-xs opacity-60">
+                    ({categoryCounts[category]})
+                  </span>
+                </button>
+              ),
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1015,32 +1099,42 @@ _Keep this message for your records_`;
                 onMouseLeave={() => setHoveredImage(null)}
                 onClick={() => setSelectedImage(image)}
               >
-                <div className="aspect-[4/3] overflow-hidden" style={{ backgroundColor: COLORS.secondary }}>
+                <div
+                  className="aspect-[4/3] overflow-hidden"
+                  style={{ backgroundColor: COLORS.secondary }}
+                >
                   <img
                     src={image.src}
                     alt={image.title}
                     className="w-full h-full object-cover transform transition duration-700 group-hover:scale-110"
                     loading="lazy"
                     onError={(e) => {
-                      e.currentTarget.src = "https://placehold.co/800x600/1a1a1a/ffffff?text=Image+Coming+Soon";
+                      e.currentTarget.src =
+                        "https://placehold.co/800x600/1a1a1a/ffffff?text=Image+Coming+Soon";
                     }}
                   />
                 </div>
-                
-                <div 
+
+                <div
                   className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300 ${
                     hoveredImage === image.id ? "opacity-100" : "opacity-0"
                   }`}
                 >
                   <div className="absolute bottom-0 left-0 right-0 p-6 transform transition-transform duration-300 translate-y-full group-hover:translate-y-0">
-                    <h3 className="text-xl font-bold text-white mb-1">{image.title}</h3>
-                    <p className="text-sm text-zinc-300 mb-2">{image.description}</p>
-                    <p className="text-xs" style={{ color: COLORS.primary }}>{image.date}</p>
-                    <div 
+                    <h3 className="text-xl font-bold text-white mb-1">
+                      {image.title}
+                    </h3>
+                    <p className="text-sm text-zinc-300 mb-2">
+                      {image.description}
+                    </p>
+                    <p className="text-xs" style={{ color: COLORS.primary }}>
+                      {image.date}
+                    </p>
+                    <div
                       className="mt-3 inline-block backdrop-blur-sm px-3 py-1 rounded-full text-xs"
                       style={{ backgroundColor: `${COLORS.primary}20` }}
                     >
-                      {categoryLabels[image.category].split(' ')[0]}
+                      {categoryLabels[image.category].split(" ")[0]}
                     </div>
                   </div>
                 </div>
@@ -1057,16 +1151,23 @@ _Keep this message for your records_`;
       </section>
 
       {/* SERVICES SECTION */}
-      <section id="services" className="py-24 px-6" style={{ backgroundColor: COLORS.bgSecondary }}>
+      <section
+        id="services"
+        className="py-24 px-6"
+        style={{ backgroundColor: COLORS.bgSecondary }}
+      >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Our Services</h2>
             <p className="text-zinc-400 max-w-2xl mx-auto">
-              Choose from our range of professional services tailored to your needs
+              Choose from our range of professional services tailored to your
+              needs
             </p>
-            <div 
+            <div
               className="w-20 h-1 mx-auto mt-4 rounded-full"
-              style={{ background: `linear-gradient(to right, ${COLORS.primary}, transparent)` }}
+              style={{
+                background: `linear-gradient(to right, ${COLORS.primary}, transparent)`,
+              }}
             />
           </div>
 
@@ -1081,15 +1182,26 @@ _Keep this message for your records_`;
                     : "hover:scale-105"
                 }`}
                 style={{
-                  borderColor: selectedService?.id === service.id ? COLORS.primary : COLORS.secondaryLight,
-                  backgroundColor: selectedService?.id === service.id ? COLORS.bgCard : "transparent",
+                  borderColor:
+                    selectedService?.id === service.id
+                      ? COLORS.primary
+                      : COLORS.secondaryLight,
+                  backgroundColor:
+                    selectedService?.id === service.id
+                      ? COLORS.bgCard
+                      : "transparent",
                 }}
               >
                 <div className="text-5xl mb-4">{service.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
-                <p className="text-zinc-400 text-sm mb-3">{service.description}</p>
+                <p className="text-zinc-400 text-sm mb-3">
+                  {service.description}
+                </p>
                 <p className="text-sm" style={{ color: COLORS.primary }}>
-                  {service.packages.length} packages from KES {Math.min(...service.packages.map(p => p.price)).toLocaleString()}
+                  {service.packages.length} packages from KES{" "}
+                  {Math.min(
+                    ...service.packages.map((p) => p.price),
+                  ).toLocaleString()}
                 </p>
               </div>
             ))}
@@ -1098,7 +1210,12 @@ _Keep this message for your records_`;
       </section>
 
       {/* BOOKINGS SECTION */}
-      <section id="bookings" ref={packagesRef} className="py-24 px-6" style={{ backgroundColor: COLORS.bgSecondary }}>
+      <section
+        id="bookings"
+        ref={packagesRef}
+        className="py-24 px-6"
+        style={{ backgroundColor: COLORS.bgSecondary }}
+      >
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl text-center font-bold mb-4">
             {selectedService ? selectedService.title : "Select a Service"}
@@ -1110,8 +1227,8 @@ _Keep this message for your records_`;
           </p>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* LEFT - PACKAGES */}
-            <div className="flex-1 space-y-6">
+            {/* ---------- LEFT SIDE: PACKAGES LIST ---------- */}
+            <div className="flex-1 order-1 lg:order-1">
               {selectedService && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-zinc-300 mb-4">
@@ -1127,45 +1244,181 @@ _Keep this message for your records_`;
                           : "hover:scale-105"
                       }`}
                       style={{
-                        borderColor: selectedPackage?.id === pkg.id ? COLORS.primary : COLORS.secondaryLight,
-                        backgroundColor: selectedPackage?.id === pkg.id ? COLORS.bgCard : "transparent",
+                        borderColor:
+                          selectedPackage?.id === pkg.id
+                            ? COLORS.primary
+                            : COLORS.secondaryLight,
+                        backgroundColor:
+                          selectedPackage?.id === pkg.id
+                            ? COLORS.bgCard
+                            : "transparent",
                       }}
                     >
                       {pkg.popular && (
-                        <div 
+                        <div
                           className="absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-semibold"
-                          style={{ backgroundColor: COLORS.primary, color: "#000" }}
+                          style={{
+                            backgroundColor: COLORS.primary,
+                            color: "#000",
+                          }}
                         >
                           MOST POPULAR
                         </div>
                       )}
                       <div className="flex justify-between items-start mb-3">
                         <h3 className="font-semibold text-xl">{pkg.name}</h3>
-                        <p className="text-2xl font-bold" style={{ color: COLORS.primary }}>
+                        <p
+                          className="text-2xl font-bold"
+                          style={{ color: COLORS.primary }}
+                        >
                           KSh {pkg.price.toLocaleString()}
                         </p>
                       </div>
                       <button className="text-sm text-zinc-400 hover:text-white transition">
-                        {selectedPackage?.id === pkg.id ? "Selected ✓" : "Click to select"}
+                        {selectedPackage?.id === pkg.id
+                          ? "Selected ✓"
+                          : "Click to select"}
                       </button>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* BOOKING FORM */}
+              {!selectedService && (
+                <div className="text-center py-12 text-zinc-500">
+                  <p className="text-6xl mb-4">📸</p>
+                  <p className="text-xl">Select a service to begin</p>
+                  <p className="mt-2">
+                    Choose from our professional photography & videography
+                    services
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* ---------- RIGHT SIDE: PACKAGE DETAILS (sticky) ---------- */}
+            {selectedPackage && (
+              <div className="lg:w-96 order-2 lg:order-2">
+                <div className="sticky top-24">
+                  <div
+                    className="p-6 rounded-2xl"
+                    style={{
+                      backgroundColor: COLORS.bgCard,
+                      border: `1px solid ${COLORS.secondaryLight}`,
+                    }}
+                  >
+                    <div className="text-center mb-6">
+                      <div className="text-5xl mb-3">
+                        {selectedService?.icon}
+                      </div>
+                      <h3 className="text-xl font-bold">
+                        {selectedService?.title}
+                      </h3>
+                      <p className="text-zinc-400 text-sm mt-1">
+                        {selectedService?.description}
+                      </p>
+                    </div>
+
+                    <div
+                      className="p-4 rounded-xl mb-6"
+                      style={{ backgroundColor: COLORS.secondary }}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-zinc-400">Package</span>
+                        <span className="font-semibold">
+                          {selectedPackage.name}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-zinc-400">Price</span>
+                        <span
+                          className="text-2xl font-bold"
+                          style={{ color: COLORS.primary }}
+                        >
+                          KSh {selectedPackage.price.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mb-4 text-lg">
+                        What's Included:
+                      </h4>
+                      <ul className="space-y-3">
+                        {selectedPackage.features.map((feature, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <span
+                              className="mt-1"
+                              style={{ color: COLORS.primary }}
+                            >
+                              ✓
+                            </span>
+                            <span className="text-zinc-300">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {selectedPackage.popular && (
+                      <div
+                        className="mt-6 rounded-xl p-4 text-center"
+                        style={{ backgroundColor: `${COLORS.primary}20` }}
+                      >
+                        <p
+                          className="text-sm font-semibold"
+                          style={{ color: COLORS.primary }}
+                        >
+                          ⭐ Most Popular Choice
+                        </p>
+                        <p className="text-xs text-zinc-400 mt-1">
+                          Best value for your money
+                        </p>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        document
+                          .getElementById("booking-form")
+                          ?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="w-full mt-6 py-3 rounded-xl font-semibold transition"
+                      style={{ backgroundColor: COLORS.primary, color: "#000" }}
+                    >
+                      Continue to Booking
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ---------- BOOKING FORM (appears below details on mobile) ---------- */}
+            <div className="flex-1 order-3 lg:order-3">
               {selectedPackage && (
-                <div className="space-y-4 mt-6 p-8 rounded-2xl" style={{ backgroundColor: COLORS.bgCard, border: `1px solid ${COLORS.secondaryLight}` }}>
+                <div
+                  id="booking-form"
+                  className="space-y-4 p-8 rounded-2xl"
+                  style={{
+                    backgroundColor: COLORS.bgCard,
+                    border: `1px solid ${COLORS.secondaryLight}`,
+                  }}
+                >
                   <h3 className="text-2xl font-bold mb-6">
                     Complete Your Booking
                   </h3>
 
-                  <div className="p-4 rounded-xl mb-6" style={{ backgroundColor: COLORS.secondary }}>
+                  <div
+                    className="p-4 rounded-xl mb-6"
+                    style={{ backgroundColor: COLORS.secondary }}
+                  >
                     <p className="text-sm text-zinc-400">Selected Package</p>
                     <p className="font-semibold">
                       {selectedService?.title} - {selectedPackage.name}
                     </p>
-                    <p className="font-bold mt-1" style={{ color: COLORS.primary }}>
+                    <p
+                      className="font-bold mt-1"
+                      style={{ color: COLORS.primary }}
+                    >
                       KSh {selectedPackage.price.toLocaleString()}
                     </p>
                   </div>
@@ -1175,25 +1428,22 @@ _Keep this message for your records_`;
                       Event Date *
                     </label>
                     <DatePicker
-  selected={form.date ? new Date(form.date) : null}
-  onChange={(date: Date | null) => {
-    if (!date) return;
-    setForm({
-      ...form,
-      date: formatLocalDate(date),
-    });
-  }}
-
+                      selected={form.date ? new Date(form.date) : null}
+                      onChange={(date: Date | null) => {
+                        if (!date) return;
+                        setForm({
+                          ...form,
+                          date: formatLocalDate(date),
+                        });
+                      }}
                       filterDate={filterAvailableDates}
                       dayClassName={(date) => {
                         const formatted = formatLocalDate(date);
                         const count = getBookingsForDate(formatted).length;
-                        if (count >= 2) {
+                        if (count >= 2)
                           return "bg-red-500/50 text-white rounded-full cursor-not-allowed";
-                        }
-                        if (count === 1) {
+                        if (count === 1)
                           return "bg-yellow-500/50 text-black rounded-full";
-                        }
                         return "hover:bg-zinc-700 rounded-full";
                       }}
                       minDate={new Date()}
@@ -1202,7 +1452,8 @@ _Keep this message for your records_`;
                       dateFormat="yyyy-MM-dd"
                     />
                     <p className="text-xs text-zinc-500 mt-2">
-                      🟡 1 slot booked &nbsp;&nbsp; 🔴 Fully booked (2 slots max per day)
+                      🟡 1 slot booked &nbsp;&nbsp; 🔴 Fully booked (2 slots max
+                      per day)
                     </p>
                   </div>
 
@@ -1263,113 +1514,93 @@ _Keep this message for your records_`;
                   </button>
 
                   <p className="text-xs text-zinc-500 text-center mt-4">
-                    By confirming, you agree to our terms and conditions. We'll contact you via WhatsApp to finalize the details.
+                    By confirming, you agree to our terms and conditions. We'll
+                    contact you via WhatsApp to finalize the details.
                     <br />
                     You'll receive a Booking ID to access your customer portal.
                   </p>
                 </div>
               )}
-
-              {!selectedService && (
-                <div className="text-center py-12 text-zinc-500">
-                  <p className="text-6xl mb-4">📸</p>
-                  <p className="text-xl">Select a service to begin</p>
-                  <p className="mt-2">
-                    Choose from our professional photography & videography services
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT - PACKAGE DETAILS PANEL */}
-            <div className="lg:w-96">
-              <div className="sticky top-24">
-                {selectedPackage ? (
-                  <div className="p-6 rounded-2xl" style={{ backgroundColor: COLORS.bgCard, border: `1px solid ${COLORS.secondaryLight}` }}>
-                    <div className="text-center mb-6">
-                      <div className="text-5xl mb-3">{selectedService?.icon}</div>
-                      <h3 className="text-xl font-bold">{selectedService?.title}</h3>
-                      <p className="text-zinc-400 text-sm mt-1">{selectedService?.description}</p>
-                    </div>
-
-                    <div className="p-4 rounded-xl mb-6" style={{ backgroundColor: COLORS.secondary }}>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-zinc-400">Package</span>
-                        <span className="font-semibold">{selectedPackage.name}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-zinc-400">Price</span>
-                        <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>
-                          KSh {selectedPackage.price.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-4 text-lg">What's Included:</h4>
-                      <ul className="space-y-3">
-                        {selectedPackage.features.map((feature, index) => (
-                          <li key={index} className="flex items-start gap-3">
-                            <span className="mt-1" style={{ color: COLORS.primary }}>✓</span>
-                            <span className="text-zinc-300">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {selectedPackage.popular && (
-                      <div className="mt-6 rounded-xl p-4 text-center" style={{ backgroundColor: `${COLORS.primary}20` }}>
-                        <p className="text-sm font-semibold" style={{ color: COLORS.primary }}>⭐ Most Popular Choice</p>
-                        <p className="text-xs text-zinc-400 mt-1">Best value for your money</p>
-                      </div>
-                    )}
-                  </div>
-                ) : selectedService ? (
-                  <div className="p-6 rounded-2xl text-center" style={{ backgroundColor: COLORS.bgCard, border: `1px solid ${COLORS.secondaryLight}` }}>
-                    <div className="text-5xl mb-4">{selectedService.icon}</div>
-                    <h3 className="text-xl font-bold mb-2">{selectedService.title}</h3>
-                    <p className="text-zinc-400 text-sm mb-4">{selectedService.description}</p>
-                    <p className="text-zinc-500 text-sm">
-                      Select a package to see what's included
-                    </p>
-                  </div>
-                ) : (
-                  <div className="p-6 rounded-2xl text-center" style={{ backgroundColor: COLORS.bgCard, border: `1px solid ${COLORS.secondaryLight}` }}>
-                    <p className="text-4xl mb-3">💡</p>
-                    <p className="text-zinc-400 text-sm">
-                      Select a service and package to see detailed information here
-                    </p>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t py-12 px-6" style={{ backgroundColor: COLORS.bgSecondary, borderColor: COLORS.secondaryLight }}>
+      <footer
+        className="border-t py-12 px-6"
+        style={{
+          backgroundColor: COLORS.bgSecondary,
+          borderColor: COLORS.secondaryLight,
+        }}
+      >
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <h3 className="text-xl font-bold mb-4">Alakara Studios</h3>
-              <p className="text-zinc-500 text-sm">Where Moments Become Memories</p>
-              <p className="text-zinc-500 text-sm mt-2">Professional Photography & Videography</p>
+              <p className="text-zinc-500 text-sm">
+                Where Moments Become Memories
+              </p>
+              <p className="text-zinc-500 text-sm mt-2">
+                Professional Photography & Videography
+              </p>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Quick Links</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#home" className="text-zinc-500 hover:text-white transition">Home</a></li>
-                <li><a href="#portfolio" className="text-zinc-500 hover:text-white transition">Portfolio</a></li>
-                <li><a href="#services" className="text-zinc-500 hover:text-white transition">Services</a></li>
-                <li><a href="#bookings" className="text-zinc-500 hover:text-white transition">Book Now</a></li>
+                <li>
+                  <a
+                    href="#home"
+                    className="text-zinc-500 hover:text-white transition"
+                  >
+                    Home
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#portfolio"
+                    className="text-zinc-500 hover:text-white transition"
+                  >
+                    Portfolio
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#services"
+                    className="text-zinc-500 hover:text-white transition"
+                  >
+                    Services
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#bookings"
+                    className="text-zinc-500 hover:text-white transition"
+                  >
+                    Book Now
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Customer</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="/portal" className="text-zinc-500 hover:text-white transition">Customer Portal</a></li>
-                <li><a href="/dashboard" className="text-zinc-500 hover:text-white transition">Admin Login</a></li>
+                <li>
+                  <a
+                    href="/portal"
+                    className="text-zinc-500 hover:text-white transition"
+                  >
+                    Customer Portal
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/dashboard"
+                    className="text-zinc-500 hover:text-white transition"
+                  >
+                    Admin Login
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
@@ -1383,7 +1614,8 @@ _Keep this message for your records_`;
           </div>
           <div className="text-center pt-8 border-t border-zinc-800">
             <p className="text-zinc-500 text-sm">
-              &copy; {new Date().getFullYear()} Alakara Studios. All rights reserved.
+              &copy; {new Date().getFullYear()} Alakara Studios. All rights
+              reserved.
             </p>
           </div>
         </div>
@@ -1400,7 +1632,7 @@ _Keep this message for your records_`;
             opacity: 1;
           }
         }
-        
+
         @keyframes fadeInUp {
           from {
             opacity: 0;
@@ -1411,7 +1643,7 @@ _Keep this message for your records_`;
             transform: translateY(0);
           }
         }
-        
+
         .animate-slide-in {
           animation: slideIn 0.3s ease-out;
         }
