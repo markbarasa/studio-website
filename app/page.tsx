@@ -199,8 +199,6 @@ const PORTFOLIO_IMAGES: PortfolioImage[] = [
   },
 ];
 
-
-
 /* ---------------- SERVICES ---------------- */
 const SERVICES: Service[] = [
   {
@@ -212,7 +210,7 @@ const SERVICES: Service[] = [
       {
         id: "w1",
         name: "Basic",
-        price: 25000,
+        price: 28000,
         features: [
           "1 Photographer",
           "1 Videographer",
@@ -224,7 +222,7 @@ const SERVICES: Service[] = [
       {
         id: "w2",
         name: "Standard",
-        price: 35000,
+        price: 38000,
         features: [
           "1 Photographer",
           "1 Videographer",
@@ -238,7 +236,7 @@ const SERVICES: Service[] = [
       {
         id: "w3",
         name: "Premium",
-        price: 50000,
+        price: 55000,
         features: [
           "2 Photographers",
           "2 Videographers",
@@ -259,7 +257,7 @@ const SERVICES: Service[] = [
       {
         id: "t1",
         name: "Basic",
-        price: 20000,
+        price: 23000,
         features: [
           "1 Photographer",
           "1 Videographer",
@@ -271,7 +269,7 @@ const SERVICES: Service[] = [
       {
         id: "t2",
         name: "Standard",
-        price: 30000,
+        price: 33000,
         features: [
           "1 Photographer",
           "1 Videographer",
@@ -285,7 +283,7 @@ const SERVICES: Service[] = [
       {
         id: "t3",
         name: "Premium",
-        price: 45000,
+        price: 48000,
         features: [
           "2 Photographers",
           "2 Videographers",
@@ -577,7 +575,6 @@ const SERVICES: Service[] = [
   },
 ];
 
-
 /* ---------------- CUSTOM COLOR SCHEME ---------------- */
 const COLORS = {
   primary: "#C6A43F",
@@ -706,7 +703,7 @@ export default function Home() {
   );
   const [hoveredImage, setHoveredImage] = useState<number | null>(null);
   const [showBookingSuccessModal, setShowBookingSuccessModal] = useState(false);
-const [lastBookingDetails, setLastBookingDetails] = useState<any>(null);
+  const [lastBookingDetails, setLastBookingDetails] = useState<any>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -1732,15 +1729,16 @@ I will send the deposit shortly.`}
                   >
                     📋 Copy Message
                   </button>
-                  <a
-                    href={`https://wa.me/254797356421?text=${encodeURIComponent(
-                      `🎬 *NEW BOOKING REQUEST*\n\nBooking ID: ${lastBookingDetails.bookingId}\nService: ${lastBookingDetails.service}\nPackage: ${lastBookingDetails.package}\nEvent Date: ${lastBookingDetails.displayDate}\nTotal: KES ${lastBookingDetails.price.toLocaleString()}\nDeposit Required: KES ${Math.ceil(lastBookingDetails.price / 2).toLocaleString()} (50%)\n\nMy Details:\nName: ${lastBookingDetails.name}\nPhone: ${lastBookingDetails.phone}\n${lastBookingDetails.message ? `Message: ${lastBookingDetails.message}` : ""}\n\nI will send the deposit shortly.`,
-                    )}`}
-                    target="_blank"
+                  <button
+                    onClick={() => {
+                      const fullMessage = `🎬 *NEW BOOKING REQUEST*\n\nBooking ID: ${lastBookingDetails.bookingId}\nService: ${lastBookingDetails.service}\nPackage: ${lastBookingDetails.package}\nEvent Date: ${lastBookingDetails.displayDate}\nTotal: KES ${lastBookingDetails.price.toLocaleString()}\nDeposit Required: KES ${Math.ceil(lastBookingDetails.price / 2).toLocaleString()} (50%)\n\nMy Details:\nName: ${lastBookingDetails.name}\nPhone: ${lastBookingDetails.phone}\n${lastBookingDetails.message ? `Message: ${lastBookingDetails.message}` : ""}\n\nI will send the deposit shortly.`;
+                      const url = `https://wa.me/254797356421?text=${encodeURIComponent(fullMessage)}`;
+                      window.location.href = url;
+                    }}
                     className="flex-1 bg-green-600 text-white py-2.5 rounded-lg font-semibold text-center hover:bg-green-700 transition flex items-center justify-center gap-2"
                   >
                     💬 Open WhatsApp
-                  </a>
+                  </button>
                 </div>
               </div>
 
