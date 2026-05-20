@@ -15,86 +15,68 @@ type Video = {
 
 const videos: Video[] = [
   {
-    id: 1,
-    title: "Wedding Highlights - James & Mary",
-    description: "Beautiful wedding ceremony and reception highlights",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1519741497674-611481863552?w=600",
-    category: "Wedding",
-    duration: "3:45",
+   id: 1,
+title: "Our Stories From West Pokot",
+description: "3 Queens Living with Disabilities in West Pokot",
+url: "https://www.youtube.com/embed/XPpb8QVZ2Bg",
+thumbnail: "https://img.youtube.com/vi/XPpb8QVZ2Bg/maxresdefault.jpg",
+category: "Podcast",
+duration: "22:50",
+
   },
+ {
+  id: 2, // or your next ID
+  title: "The Kape Podcast Episode 4 | KORRA Empire",
+  description: "Inspiring conversation with KORRA Empire on The Kape Podcast.",
+  url: "https://www.youtube.com/embed/kWQ_Sx8hT3s",
+  thumbnail: "https://img.youtube.com/vi/kWQ_Sx8hT3s/maxresdefault.jpg",
+  category: "Podcast", // or "Documentary" / "Interview"
+  duration: "22:50", // You can update with the actual duration
+ 
+},
+
   {
-    id: 2,
-    title: "Traditional Ceremony - Cultural Dance",
-    description: "Vibrant traditional wedding celebrations",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=600",
-    category: "Traditional",
-    duration: "4:20",
-  },
-  {
-    id: 3,
-    title: "Corporate Event - Company Launch",
-    description: "Professional corporate event coverage",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600",
-    category: "Corporate",
-    duration: "2:30",
-  },
+  id: 3, // Use your next available ID
+  title: "AIC Septonok Choir Kitale - Nimekukimbilia",
+  description: "A moving gospel performance by the AIC Septonok Choir from Kitale.",
+  url: "https://www.youtube.com/embed/aAcHHrkqTGI",
+  thumbnail: "https://img.youtube.com/vi/aAcHHrkqTGI/maxresdefault.jpg",
+  category: "Music", // Fits perfectly in your "Music" category
+  duration: "7:17", // YouTube doesn't show duration easily here; you can update it later
+ 
+},
   {
     id: 4,
-    title: "Music Video - Gospel Song",
-    description: "Professional music video production",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600",
+    title: "Chemoyo by Pokot Boy - Latest Kalenjin Music",
+    description: "An exciting new release from Pokot Boy.",
+    url: "https://www.youtube.com/embed/zqzk8a-Mibc",
+    thumbnail: "https://img.youtube.com/vi/zqzk8a-Mibc/maxresdefault.jpg",
     category: "Music",
-    duration: "5:15",
+    duration: "3:53",
+    
   },
+ {
+  id: 5, // Use your next available ID
+  title: "Pokot Boy - Peace (Official Video)",
+  description: "A powerful call for unity and harmony. The official music video for 'Peace' by Pokot Boy.",
+  url: "https://www.youtube.com/embed/XjUyIJbuJS4",
+  thumbnail: "https://img.youtube.com/vi/XjUyIJbuJS4/maxresdefault.jpg",
+  category: "Music", // Fits in your "Music" category
+  duration: "4:52", // You can check the video page for the exact duration (e.g., "3:45")
+ 
+},
   {
-    id: 5,
-    title: "Documentary - Community Story",
-    description: "Cinematic documentary storytelling",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
-    category: "Documentary",
-    duration: "8:00",
-  },
-  {
-    id: 6,
-    title: "Podcast Episode - Interview",
-    description: "Studio-quality podcast recording",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1598550886636-96871e1f1b79?w=600",
-    category: "Podcast",
-    duration: "15:30",
-  },
-  {
-    id: 7,
-    title: "Birthday Shoot - Behind the Scenes",
-    description: "Fun birthday photoshoot BTS",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1492724724894-7464c27d0ceb?w=600",
-    category: "Studio",
-    duration: "1:45",
-  },
-  {
-    id: 8,
-    title: "Graduation Ceremony",
-    description: "Special graduation day coverage",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600",
-    category: "Events",
-    duration: "3:20",
-  },
-  {
-    id: 9,
-    title: "Choir Recording - 10 Songs",
-    description: "Professional choir video production",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600",
-    category: "Music",
-    duration: "45:00",
-  },
+  id: 6, // Use your next available ID
+  title: "AIC Septonok Choir Kitale - Nayaweza Mambo Yote",
+  description: "An uplifting gospel performance by the AIC Septonok Choir from Kitale.",
+  url: "https://www.youtube.com/embed/_lByM-8zKeo",
+  thumbnail: "https://img.youtube.com/vi/_lByM-8zKeo/maxresdefault.jpg",
+  category: "Music", // Fits in your "Music" category
+  duration: "6:50", // You can check the video page for the exact duration
+  // type: "youtube",
+},
+
+
 ];
 
 const categories = ["All", "Wedding", "Traditional", "Corporate", "Music", "Documentary", "Podcast", "Studio", "Events"];
@@ -248,7 +230,7 @@ export default function VideoReels() {
       {/* YouTube Channel CTA */}
       <div className="text-center pt-8">
         <a
-          href="https://www.youtube.com/@AlakaraStudios"
+          href="https://www.youtube.com/@TheKapePodcast"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-semibold transition"
