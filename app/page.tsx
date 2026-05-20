@@ -5,6 +5,9 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { createBooking, getBookings } from "@/lib/supabase/db";
+import FloatingActions from "@/components/FloatingActions";
+import EmergencyBanner from "@/components/EmergencyBanner";
+import PriceListPDF from "@/components/PriceListPDF";
 /* ---------------- TYPES ---------------- */
 type PackageFeature = string;
 
@@ -934,6 +937,8 @@ export default function Home() {
       style={{ backgroundColor: COLORS.bgPrimary, color: COLORS.textPrimary }}
     >
       <Navbar />
+      {/* Emergency Banner */}
+      <EmergencyBanner />
 
       {/* TOAST NOTIFICATION */}
       {toast && (
@@ -1552,7 +1557,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="#bookings"
+                    href="#services"
                     className="text-zinc-500 hover:text-white transition"
                   >
                     Book Now
@@ -1569,6 +1574,15 @@ export default function Home() {
                     className="text-zinc-500 hover:text-white transition"
                   >
                     Customer Portal
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="/service-areas"
+                    className="text-zinc-500 hover:text-white transition"
+                  >
+                    Service Areas
                   </a>
                 </li>
                 <li>
@@ -1767,6 +1781,13 @@ I will send the deposit shortly.`}
           </div>
         </div>
       )}
+
+      {/* Floating Action Buttons */}
+      <div>
+        <h4 className="font-semibold mb-3">Resources</h4>
+        <PriceListPDF />
+      </div>
+      <FloatingActions />
     </main>
   );
 }
