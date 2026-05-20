@@ -20,8 +20,10 @@ export default function Navbar() {
             <Link href="/" className="hover:text-gold-400 transition">Home</Link>
             <Link href="/#portfolio" className="hover:text-gold-400 transition">Portfolio</Link>
             <Link href="/#services" className="hover:text-gold-400 transition">Services</Link>
-            <Link href="/#bookings" className="hover:text-gold-400 transition">Book Now</Link>
+            <Link href="/service-areas" className="hover:text-amber-400 transition">Service Areas</Link>
+            <Link href="/#services" className="hover:text-gold-400 transition">Book Now</Link>
             <Link href="/portal" className="hover:text-gold-400 transition">Portal</Link>
+            
             <Link href="/contact" className="hover:text-gold-400 transition">Contact</Link>
           </div>
 
