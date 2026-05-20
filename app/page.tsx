@@ -8,6 +8,7 @@ import { createBooking, getBookings } from "@/lib/supabase/db";
 import FloatingActions from "@/components/FloatingActions";
 import EmergencyBanner from "@/components/EmergencyBanner";
 import PriceListPDF from "@/components/PriceListPDF";
+import VideoReels from "@/components/VideoReels";
 /* ---------------- TYPES ---------------- */
 type PackageFeature = string;
 
@@ -1132,6 +1133,13 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* VIDEO REELS SECTION */}
+<section className="py-24 px-6 bg-black">
+  <div className="max-w-7xl mx-auto">
+    <VideoReels />
+  </div>
+</section>
 
       {/* SERVICES SECTION */}
       <section
